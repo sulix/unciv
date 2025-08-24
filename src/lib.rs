@@ -16,9 +16,8 @@
  * IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-
-extern crate byteorder;
-use byteorder::{LittleEndian, ReadBytesExt};
+mod binary_io;
+use binary_io::*;
 use std::io::Seek;
 use std::io;
 use std::io::Read;
@@ -56,18 +55,18 @@ pub struct RimImage
 impl RimImage {
     /// Read a RimHeader from a stream. Image data immediately follows.
     pub fn from_stream(reader: &mut (impl Read + Seek)) -> std::io::Result<RimImage> {
-        let rim_sig = reader.read_u32::<LittleEndian>()?;
+        let rim_sig = read_le32(reader)?;
 
         // 'RIMF'
         if rim_sig != RIM_SIGNATURE {
             return Err(io::Error::new(io::ErrorKind::Other, "Invalid RIM signature"));
         }
 
-        let rim_ver = reader.read_u32::<LittleEndian>()?;
-        let rim_width = reader.read_u16::<LittleEndian>()?;
-        let rim_height = reader.read_u16::<LittleEndian>()?;
-        let rim_pitch = reader.read_u16::<LittleEndian>()?;
-        let rim_fmt = reader.read_u16::<LittleEndian>()?;
+        let rim_ver = read_le32(reader)?;
+        let rim_width = read_le16(reader)?;
+        let rim_height = read_le16(reader)?;
+        let rim_pitch = read_le16(reader)?;
+        let rim_fmt = read_le16(reader)?;
 
         let fmt = match rim_fmt {
             0 => RimFormat::RGB555,
@@ -79,7 +78,7 @@ impl RimImage {
         let mut data = Vec::<u16>::with_capacity(num_pixels);
         for _line_num in 0..rim_height {
             for _px in 0..rim_width {
-                data.push(reader.read_u16::<LittleEndian>()?);
+                data.push(read_le16(reader)?);
             }
 
             if rim_width * 2 != rim_pitch {
@@ -192,24 +191,24 @@ pub struct ZfsFile
 
 impl ZfsFile {
     pub fn from_stream(reader : &mut (impl Read + Seek)) -> io::Result<ZfsFile> {
-        let sig = reader.read_u32::<LittleEndian>()?;
+        let sig = read_le32(reader)?;
         // 'ZFS3'
         if sig != ZFS_SIGNATURE {
             return Err(io::Error::new(io::ErrorKind::Other, "Invalid ZFS signature"));
         }
-        let version = reader.read_u32::<LittleEndian>()?;
-        let max_filename_len = reader.read_u32::<LittleEndian>()?;
-        let files_per_table = reader.read_u32::<LittleEndian>()?;
-        let num_files = reader.read_u32::<LittleEndian>()?;
-        let _unk2 = reader.read_u32::<LittleEndian>()?;
-        let filetable_offset = reader.read_u32::<LittleEndian>()?;
+        let version = read_le32(reader)?;
+        let max_filename_len = read_le32(reader)?;
+        let files_per_table = read_le32(reader)?;
+        let num_files = read_le32(reader)?;
+        let _unk2 = read_le32(reader)?;
+        let filetable_offset = read_le32(reader)?;
 
 
         let mut files = Vec::<ZfsEntry>::new();
 
         reader.seek(io::SeekFrom::Start(filetable_offset as u64))?;
 
-        let mut next_table_offset = reader.read_u32::<LittleEndian>()?;
+        let mut next_table_offset = read_le32(reader)?;
         for i in 0..num_files {
             let mut raw_name = vec![0; max_filename_len as usize];
             reader.read_exact(&mut raw_name)?;
@@ -220,11 +219,11 @@ impl ZfsFile {
 
             let file_name = String::from_utf8_lossy(&raw_name);
             let file_name = file_name.trim_matches('\0');
-            let data_offset = reader.read_u32::<LittleEndian>()?;
-            let _unk3 = reader.read_u32::<LittleEndian>()?;
-            let data_size = reader.read_u32::<LittleEndian>()?;
-            let timestamp = reader.read_u32::<LittleEndian>()?;
-            let flags = reader.read_u32::<LittleEndian>()?;
+            let data_offset = read_le32(reader)?;
+            let _unk3 = read_le32(reader)?;
+            let data_size = read_le32(reader)?;
+            let timestamp = read_le32(reader)?;
+            let flags = read_le32(reader)?;
 
             files.push(ZfsEntry{
                 name : file_name.to_string(),
@@ -236,7 +235,7 @@ impl ZfsFile {
 
             if (i % files_per_table) == (files_per_table - 1) {
                 reader.seek(io::SeekFrom::Start(next_table_offset as u64))?;
-                next_table_offset = reader.read_u32::<LittleEndian>()?;
+                next_table_offset = read_le32(reader)?;
             }
         }
 
