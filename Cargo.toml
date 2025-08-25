@@ -13,5 +13,5 @@ edition = "2015"
 set-timestamps = []
 
 [dependencies]
-png = "0.15"
+png = { version = "0.15", optional = true }
 

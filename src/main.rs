@@ -19,13 +19,17 @@
 #![cfg_attr(feature = "set-timestamps", allow(stable_features))]
 #![cfg_attr(feature = "set-timestamps", feature(file_set_times))]
 
+#[cfg(feature = "png")]
 extern crate png;
 extern crate unciv;
 use std::fs::File;
+#[cfg(feature = "png")]
 use std::io::Read;
+#[cfg(feature = "png")]
 use std::io::Seek;
 use std::io::Write;
 
+#[cfg(feature = "png")]
 pub fn save_rim_image(entry : &unciv::ZfsEntry, reader : &mut (impl Read + Seek)) -> std::io::Result<()> {
     let rim_image = entry.read_rim_image(reader)?;
 
@@ -63,7 +67,8 @@ fn main() {
     let zfs_file = unciv::ZfsFile::from_stream(&mut file).unwrap();
 
     for entry in zfs_file.files {
-        if entry.name.ends_with(".rim") {
+        if cfg!(feature = "png") && entry.name.ends_with(".rim") {
+            #[cfg(feature = "png")]
             save_rim_image(&entry, &mut file).unwrap();
         } else {
             let data = entry.read_data(&mut file).unwrap();
