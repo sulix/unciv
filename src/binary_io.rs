@@ -18,56 +18,66 @@
 
 #![allow(dead_code)]
 
+/// Reads a single byte (unsigned, 8-bit integer) from an input stream.
 pub fn read_byte(reader: &mut dyn std::io::Read) -> std::io::Result<u8> {
-    let mut out_byte: u8 = 0;
+    let mut out_byte : u8 = 0;
     reader.read_exact(std::slice::from_mut(&mut out_byte))?;
-    return Ok(out_byte);
+    Ok(out_byte)
 }
 
-pub fn read_le16(reader: &mut dyn std::io::Read) -> std::io::Result<u16> {
-    let mut raw_bytes = [0 as u8; 2];
+/// Reads a little-endian unsigned 16-bit integer from a stream.
+pub fn read_le16(reader : &mut dyn std::io::Read) -> std::io::Result<u16> {
+    let mut raw_bytes = [0_u8; 2];
     reader.read_exact(&mut raw_bytes)?;
-    return Ok(u16::from_le_bytes(raw_bytes));
+    Ok(u16::from_le_bytes(raw_bytes))
 }
 
-pub fn read_le32(reader: &mut dyn std::io::Read) -> std::io::Result<u32> {
-    let mut raw_bytes = [0 as u8; 4];
+/// Reads a little-endian unsigned 32-bit integer from a stream.
+pub fn read_le32(reader : &mut dyn std::io::Read) -> std::io::Result<u32> {
+    let mut raw_bytes = [0_u8; 4];
     reader.read_exact(&mut raw_bytes)?;
-    return Ok(u32::from_le_bytes(raw_bytes));
+    Ok(u32::from_le_bytes(raw_bytes))
 }
 
-pub fn read_be16(reader: &mut dyn std::io::Read) -> std::io::Result<u16> {
-    let mut raw_bytes = [0 as u8; 2];
+/// Reads a big-endian unsigned 16-bit integer from a stream.
+pub fn read_be16(reader : &mut dyn std::io::Read) -> std::io::Result<u16> {
+    let mut raw_bytes = [0_u8; 2];
     reader.read_exact(&mut raw_bytes)?;
-    return Ok(u16::from_be_bytes(raw_bytes));
+    Ok(u16::from_be_bytes(raw_bytes))
 }
 
-pub fn read_be32(reader: &mut dyn std::io::Read) -> std::io::Result<u32> {
-    let mut raw_bytes = [0 as u8; 4];
+/// Reads a big-endian unsigned 32-bit integer from a stream.
+pub fn read_be32(reader : &mut dyn std::io::Read) -> std::io::Result<u32> {
+    let mut raw_bytes = [0_u8; 4];
     reader.read_exact(&mut raw_bytes)?;
-    return Ok(u32::from_be_bytes(raw_bytes));
+    Ok(u32::from_be_bytes(raw_bytes))
 }
 
-pub fn write_byte(out_byte: u8, writer: &mut dyn std::io::Write) -> std::io::Result<()> {
+/// Writes a single byte (unsigned, 8-bit integer) to a stream.
+pub fn write_byte(out_byte : u8, writer: &mut dyn std::io::Write) -> std::io::Result<()> {
     writer.write_all(std::slice::from_ref(&out_byte))
 }
 
-pub fn write_be16(out_val: u16, writer: &mut dyn std::io::Write) -> std::io::Result<()> {
+/// Writes a big-endian unsigned 16-bit integer to a stream.
+pub fn write_be16(out_val : u16, writer: &mut dyn std::io::Write) -> std::io::Result<()> {
     let raw_bytes = out_val.to_be_bytes();
     writer.write_all(&raw_bytes)
 }
 
-pub fn write_be32(out_val: u32, writer: &mut dyn std::io::Write) -> std::io::Result<()> {
+/// Writes a big-endian unsigned 32-bit integer to a stream.
+pub fn write_be32(out_val : u32, writer: &mut dyn std::io::Write) -> std::io::Result<()> {
     let raw_bytes = out_val.to_be_bytes();
     writer.write_all(&raw_bytes)
 }
 
-pub fn write_le16(out_val: u16, writer: &mut dyn std::io::Write) -> std::io::Result<()> {
+/// Writes a little-endian unsigned 16-bit integer to a stream.
+pub fn write_le16(out_val : u16, writer: &mut dyn std::io::Write) -> std::io::Result<()> {
     let raw_bytes = out_val.to_le_bytes();
     writer.write_all(&raw_bytes)
 }
 
-pub fn write_le32(out_val: u32, writer: &mut dyn std::io::Write) -> std::io::Result<()> {
+/// Writes a little-endian unsigned 32-bit integer to a stream.
+pub fn write_le32(out_val : u32, writer: &mut dyn std::io::Write) -> std::io::Result<()> {
     let raw_bytes = out_val.to_le_bytes();
     writer.write_all(&raw_bytes)
 }
