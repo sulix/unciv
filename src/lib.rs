@@ -59,7 +59,7 @@ impl RimImage {
 
         // 'RIMF'
         if rim_sig != RIM_SIGNATURE {
-            return Err(io::Error::new(io::ErrorKind::Other, "Invalid RIM signature"));
+            return Err(io::Error::other("Invalid RIM signature"));
         }
 
         let rim_ver = read_le32(reader)?;
@@ -71,7 +71,7 @@ impl RimImage {
         let fmt = match rim_fmt {
             0 => RimFormat::RGB555,
             1 => RimFormat::RGB565,
-            _ => { return Err(std::io::Error::new(io::ErrorKind::Other, "Unknown RIM format")); }
+            _ => { return Err(std::io::Error::other("Unknown RIM format")); }
         };
 
         let num_pixels = rim_width as usize * rim_height as usize;
@@ -194,7 +194,7 @@ impl ZfsFile {
         let sig = read_le32(reader)?;
         // 'ZFS3'
         if sig != ZFS_SIGNATURE {
-            return Err(io::Error::new(io::ErrorKind::Other, "Invalid ZFS signature"));
+            return Err(io::Error::other("Invalid ZFS signature"));
         }
         let version = read_le32(reader)?;
         let max_filename_len = read_le32(reader)?;
